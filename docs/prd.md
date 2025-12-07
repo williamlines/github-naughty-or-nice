@@ -552,7 +552,7 @@ The results page features a **dramatic envelope reveal**:
 | ------------------------- | ----------------------------------- | ---------- |
 | Which scoring categories? | 6 categories as defined             | 2025-12-07 |
 | AI model for verdicts?    | GPT-4o-mini (cost/speed balance)    | 2025-12-07 |
-| Tech stack?               | Next.js 14, Tailwind, Framer Motion | 2025-12-07 |
+| Tech stack?               | Next.js 15, React 19, Tailwind, Framer Motion | 2025-12-07 |
 | Cache duration?           | 1 hour                              | 2025-12-07 |
 
 ### 11.2 Open 🟡
@@ -577,6 +577,10 @@ The results page features a **dramatic envelope reveal**:
 ---
 
 ## Changelog
+
+### Version 1.1 (2025-12-07)
+
+- Updated tech stack references: Next.js 15, React 19
 
 ### Version 1.0 (2025-12-07)
 

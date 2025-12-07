@@ -313,7 +313,8 @@ const response = await openai.chat.completions.create({
 
 | Layer                | Technology              | Rationale                               |
 | -------------------- | ----------------------- | --------------------------------------- |
-| **Framework**        | Next.js 14 (App Router) | Full-stack in one, fast deployment      |
+| **Framework**        | Next.js 15 (App Router) | Full-stack in one, Turbopack bundler    |
+| **React**            | React 19                | Latest hooks, improved performance      |
 | **Styling**          | Tailwind CSS            | Rapid iteration, easy theming           |
 | **Animations**       | Framer Motion           | Envelope reveal, micro-interactions     |
 | **Image Generation** | @vercel/og              | Built-in social card generation         |
