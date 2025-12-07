@@ -35,7 +35,11 @@ import { test } from '@seontechnologies/playwright-utils/network-recorder/fixtur
 // Set mode in test file (recommended)
 process.env.PW_NET_MODE = 'playback'; // or 'record'
 
-test('CRUD operations work offline', async ({ page, context, networkRecorder }) => {
+test('CRUD operations work offline', async ({
+  page,
+  context,
+  networkRecorder,
+}) => {
   // Setup recorder (records or plays back based on PW_NET_MODE)
   await networkRecorder.setup(context);
 
@@ -74,7 +78,10 @@ test.describe('Movie CRUD - offline with network recorder', () => {
     await page.goto('/');
   });
 
-  test('should add, edit, delete movie browser-only', async ({ page, interceptNetworkCall }) => {
+  test('should add, edit, delete movie browser-only', async ({
+    page,
+    interceptNetworkCall,
+  }) => {
     // Create
     await page.fill('#movie-name', 'Inception');
     await page.fill('#year', '2010');
@@ -125,12 +132,18 @@ test.describe('Movie CRUD - offline with network recorder', () => {
 // playwright.config.ts - Map URLs for different environments
 export default defineConfig({
   use: {
-    baseURL: process.env.CI ? 'https://app.ci.example.com' : 'http://localhost:3000',
+    baseURL: process.env.CI
+      ? 'https://app.ci.example.com'
+      : 'http://localhost:3000',
   },
 });
 
 // Test works in both environments
-test('cross-environment playback', async ({ page, context, networkRecorder }) => {
+test('cross-environment playback', async ({
+  page,
+  context,
+  networkRecorder,
+}) => {
   await networkRecorder.setup(context);
 
   // In dev: hits http://localhost:3000/api/movies
@@ -204,7 +217,12 @@ Native Playwright HAR playback is stateless - a POST create followed by GET list
 **With interceptNetworkCall** (deterministic waits):
 
 ```typescript
-test('use both utilities', async ({ page, context, networkRecorder, interceptNetworkCall }) => {
+test('use both utilities', async ({
+  page,
+  context,
+  networkRecorder,
+  interceptNetworkCall,
+}) => {
   await networkRecorder.setup(context);
 
   const createCall = interceptNetworkCall({

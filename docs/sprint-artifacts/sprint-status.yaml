@@ -1,0 +1,46 @@
+# generated: 2025-12-07
+# project: github-naughty-or-nice
+# tracking_system: file-system
+# story_location: docs/sprint-artifacts
+
+# ===========================================
+# MVP SPRINT - Condensed for hackathon
+# ===========================================
+#
+# Original 26 stories condensed to 5 MVP stories
+# Target: Working MVP with AI integration by end of day
+#
+# Estimated dev time: ~6 hours
+# ===========================================
+
+generated: 2025-12-07
+project: github-naughty-or-nice
+tracking_system: file-system
+story_location: docs/sprint-artifacts
+
+development_status:
+  # MVP Stories (consolidated)
+  mvp-1-project-setup: complete # 30 min - Next.js + types
+  mvp-2-github-scoring: complete # 2.5 hrs - GitHub API + scoring
+  mvp-3-ai-integration: complete # 30 min - OpenAI verdict
+  mvp-4-landing-api: complete # 1.5 hrs - Landing page + API route
+  mvp-5-results-page: complete # 1 hr - Results display
+
+testing_infrastructure:
+  vitest: installed
+  testing_library: installed
+  cursor_rule: .cursor/rules/testing.mdc
+  tests_written:
+    lib/scoring.ts: 20 tests passing
+    lib/github.ts: pending
+    lib/errors.ts: pending
+
+# ===========================================
+# SKIPPED FOR MVP (can add post-launch)
+# ===========================================
+# - Envelope reveal animation (7.1)
+# - OG images for social sharing (8.2, 8.3)
+# - Fancy loading animation (6.1)
+# - Response caching (API.2)
+# - Snowfall animation (5.3)
+# - Share to X button (8.1)

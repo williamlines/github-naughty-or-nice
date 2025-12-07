@@ -1,0 +1,44 @@
+# BMM Workflow Status - Naughty or Nice
+# Generated: 2025-12-07
+# Track: BMad Method (Greenfield)
+
+# STATUS DEFINITIONS:
+# ==================
+# Initial Status (before completion):
+#   - required: Must be completed to progress
+#   - optional: Can be completed but not required
+#   - recommended: Strongly suggested but not required
+#   - conditional: Required only if certain conditions met (e.g., if_has_ui)
+#
+# Completion Status:
+#   - {file-path}: File created/found (e.g., "docs/prd.md")
+#   - skipped: Optional/conditional workflow that was skipped
+
+generated: '2025-12-07'
+project: 'Naughty or Nice'
+project_type: 'software'
+selected_track: 'method'
+field_type: 'greenfield'
+workflow_path: 'method-greenfield.yaml'
+
+workflow_status:
+  # Phase 0: Discovery (Optional)
+  brainstorm-project: optional # User selected - Analyst agent
+  research: skipped # User skipped
+  product-brief: skipped # User skipped
+
+  # Phase 1: Planning
+  prd: docs/prd.md # PM agent - COMPLETED v1.0
+  validate-prd: docs/prd.md # PM agent - VALIDATED ✅
+  create-ux-design: conditional # UX Designer agent - if_has_ui
+
+  # Phase 2: Solutioning
+  create-architecture: docs/architecture.md # Architect agent - COMPLETED
+  create-epics-and-stories: docs/epics-and-stories.md # PM agent - COMPLETED
+  test-design: docs/test-plan.md # PM agent - COMPLETED (lightweight)
+  validate-architecture: docs/architecture.md # Architect agent - VALIDATED v1.1
+  implementation-readiness: required # Architect agent
+
+  # Phase 3: Implementation
+  sprint-planning: required # Scrum Master agent
+

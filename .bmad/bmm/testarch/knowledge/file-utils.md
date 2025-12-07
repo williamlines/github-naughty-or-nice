@@ -31,7 +31,10 @@ The `file-utils` module provides:
 **Implementation**:
 
 ```typescript
-import { handleDownload, readCSV } from '@seontechnologies/playwright-utils/file-utils';
+import {
+  handleDownload,
+  readCSV,
+} from '@seontechnologies/playwright-utils/file-utils';
 import path from 'node:path';
 
 const DOWNLOAD_DIR = path.join(__dirname, '../downloads');

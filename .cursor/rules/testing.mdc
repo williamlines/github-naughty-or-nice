@@ -1,0 +1,74 @@
+---
+description: Enforce unit testing for all new code
+globs:
+  - "lib/**/*.ts"
+  - "app/**/*.ts"
+  - "app/**/*.tsx"
+  - "components/**/*.tsx"
+alwaysApply: true
+---
+
+# Testing Standards
+
+## Requirement
+
+When creating or modifying code in `lib/`, `app/`, or `components/`:
+
+1. **Unit tests are REQUIRED** for all new functions and components
+2. Tests should be co-located or in `__tests__/` directories
+3. Test file naming: `*.test.ts` or `*.test.tsx`
+
+## Test Coverage Expectations
+
+| Code Type | Minimum Tests Required |
+|-----------|----------------------|
+| Utility functions (`lib/`) | Unit tests for each exported function |
+| API routes (`app/api/`) | Request/response tests for each endpoint |
+| Components (`components/`) | Render tests + interaction tests |
+| Scoring functions | Edge cases + boundary tests |
+
+## Before Completing Any Story
+
+Ask yourself:
+- [ ] Did I create tests for new functions?
+- [ ] Did I test edge cases (empty inputs, errors)?
+- [ ] Did I test the happy path?
+- [ ] Do tests pass? (`npm test`)
+
+## Test File Structure
+
+```
+lib/
+├── github.ts
+├── github.test.ts      ← Unit tests here
+├── scoring.ts
+└── scoring.test.ts     ← Unit tests here
+```
+
+## Example Test Pattern
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { functionName } from './module';
+
+describe('functionName', () => {
+  it('should handle normal input', () => {
+    expect(functionName(input)).toBe(expected);
+  });
+
+  it('should handle empty input', () => {
+    expect(functionName([])).toBe(defaultValue);
+  });
+
+  it('should throw on invalid input', () => {
+    expect(() => functionName(null)).toThrow();
+  });
+});
+```
+
+## Enforcement
+
+The Dev agent MUST:
+1. Create test files alongside implementation
+2. Run tests before marking stories complete
+3. Include test results in completion notes
