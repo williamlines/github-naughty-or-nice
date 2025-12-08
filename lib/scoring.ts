@@ -4,6 +4,8 @@ import {
   GitHubPullRequest,
   GitHubIssue,
   GitHubEvent,
+  ExternalPR,
+  ExternalContributionSummary,
 } from '@/types/github';
 
 function clamp(value: number, min: number, max: number): number {
@@ -124,39 +126,89 @@ export function scoreMessageQuality(
 
 // 3. PR Hygiene
 export function scorePRHygiene(
-  prs: GitHubPullRequest[]
+  prs: GitHubPullRequest[],
+  externalPRs: ExternalPR[] = []
 ): CategoryScores['prHygiene'] {
-  if (prs.length === 0) {
-    return { score: 50, quip: 'No PRs on record', stats: { totalPRs: 0 } };
+  // Filter to only truly external PRs (to avoid double-counting with prs from repo API)
+  const trulyExternalPRs = externalPRs.filter((pr) => pr.isExternal);
+  const totalPRCount = prs.length + trulyExternalPRs.length;
+
+  if (totalPRCount === 0) {
+    return {
+      score: 50,
+      quip: 'No PRs on record',
+      stats: { totalPRs: 0, mergeRate: 0, avgLinesChanged: 0 },
+    };
   }
 
+  // Size-based scoring only applies to own PRs (we have line counts for those)
   const linesChanged = prs.map((pr) => pr.additions + pr.deletions);
-  const avgLines = average(linesChanged);
+  const avgLines = prs.length > 0 ? average(linesChanged) : 0;
   const megaPRs = linesChanged.filter((l) => l > 1000).length;
-  const megaPRPercent = (megaPRs / prs.length) * 100;
+  const megaPRPercent = prs.length > 0 ? (megaPRs / prs.length) * 100 : 0;
   const smallPRs = linesChanged.filter((l) => l < 400).length;
-  const smallPRPercent = (smallPRs / prs.length) * 100;
+  const smallPRPercent = prs.length > 0 ? (smallPRs / prs.length) * 100 : 0;
+
+  // Calculate merge rate across all PRs (own from repo API + external from search)
+  const ownMerged = prs.filter((pr) => pr.merged_at !== null).length;
+  const externalMerged = trulyExternalPRs.filter(
+    (pr) => pr.merged_at !== null
+  ).length;
+  const totalMerged = ownMerged + externalMerged;
+  const mergeRate = (totalMerged / totalPRCount) * 100;
 
   let score = 50;
-  if (avgLines < 200) score += 30;
-  else if (avgLines < 400) score += 20;
-  else if (avgLines < 600) score += 10;
-  else if (avgLines > 800) score -= 20;
 
-  score += Math.min(smallPRPercent / 5, 15);
-  score -= megaPRPercent;
+  // Size-based scoring (for own PRs)
+  if (prs.length > 0) {
+    if (avgLines < 200) score += 30;
+    else if (avgLines < 400) score += 20;
+    else if (avgLines < 600) score += 10;
+    else if (avgLines > 800) score -= 20;
+
+    score += Math.min(smallPRPercent / 5, 15);
+    score -= megaPRPercent;
+  }
+
+  // Merge rate bonus: PRs that get merged indicate quality contributions
+  // Now calculated across all PRs (own + external)
+  if (mergeRate >= 80) score += 15;
+  else if (mergeRate >= 60) score += 10;
+  else if (mergeRate >= 40) score += 5;
+
+  // External merged PRs bonus (up to +10)
+  // Getting PRs merged in external repos shows strong contribution skills
+  score += Math.min(externalMerged * 2, 10);
 
   score = clamp(Math.round(score), 0, 100);
 
+  // Enhanced quips based on merge rate and external contributions
+  let quip: string;
+  if (score >= 70) {
+    if (externalMerged >= 3) {
+      quip = 'Open source maintainers love your contributions!';
+    } else if (mergeRate >= 80) {
+      quip = 'Your PRs get merged like hot cocoa disappears at the North Pole';
+    } else {
+      quip = 'Reviewers love your bite-sized PRs';
+    }
+  } else if (score >= 40) {
+    quip = 'Reviewers appreciate you';
+  } else {
+    quip = 'Your PRs need a table of contents';
+  }
+
   return {
     score,
-    quip:
-      score >= 70
-        ? 'Reviewers love your bite-sized PRs'
-        : score >= 40
-          ? 'Reviewers appreciate you'
-          : 'Your PRs need a table of contents',
-    stats: { totalPRs: prs.length, avgLinesChanged: Math.round(avgLines) },
+    quip,
+    stats: {
+      totalPRs: totalPRCount,
+      ownPRs: prs.length,
+      externalPRs: trulyExternalPRs.length,
+      mergedPRs: totalMerged,
+      mergeRate: Math.round(mergeRate),
+      avgLinesChanged: Math.round(avgLines),
+    },
   };
 }
 
@@ -248,17 +300,33 @@ export function scoreIssueCitizenship(
   };
 }
 
+// Default empty external contribution summary
+const emptyExternalContributions: ExternalContributionSummary = {
+  externalPushes: [],
+  externalPRActions: [],
+  uniqueExternalRepos: 0,
+  totalExternalCommits: 0,
+};
+
 // 6. Collaboration Spirit
 export function scoreCollaborationSpirit(
   events: GitHubEvent[],
-  username: string
+  username: string,
+  externalPRs: ExternalPR[] = [],
+  externalContributions: ExternalContributionSummary = emptyExternalContributions
 ): CategoryScores['collaborationSpirit'] {
   const contributionTypes = ['PushEvent', 'PullRequestEvent', 'IssuesEvent'];
   const contributions = events.filter((e) =>
     contributionTypes.includes(e.type)
   );
 
-  if (contributions.length === 0) {
+  // Check if there's any external activity
+  const hasExternalActivity =
+    contributions.length > 0 ||
+    externalPRs.length > 0 ||
+    externalContributions.totalExternalCommits > 0;
+
+  if (!hasExternalActivity) {
     return {
       score: 50,
       quip: 'Flying solo',
@@ -269,29 +337,70 @@ export function scoreCollaborationSpirit(
   // Escape special regex characters in username to prevent injection
   const escapedUsername = username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const ownRepoPattern = new RegExp(`^${escapedUsername}/`, 'i');
-  const external = contributions.filter(
+  const externalEvents = contributions.filter(
     (e) => !ownRepoPattern.test(e.repo.name)
   );
-  const externalPercent = (external.length / contributions.length) * 100;
-  const uniqueExternalRepos = new Set(external.map((e) => e.repo.name)).size;
+  const externalPercent =
+    contributions.length > 0
+      ? (externalEvents.length / contributions.length) * 100
+      : 0;
+
+  // Calculate unique external repos from multiple sources
+  const uniqueExternalReposFromEvents = new Set(
+    externalEvents.map((e) => e.repo.name)
+  );
+  const uniqueExternalReposFromPRs = new Set(
+    externalPRs.filter((pr) => pr.isExternal).map((pr) => pr.repository)
+  );
+  const allUniqueExternalRepos = new Set([
+    ...uniqueExternalReposFromEvents,
+    ...uniqueExternalReposFromPRs,
+  ]);
+  const uniqueExternalRepoCount = allUniqueExternalRepos.size;
 
   let score = 30;
+
+  // Base score from event activity
   score += Math.min(externalPercent / 2.5, 40);
-  score += Math.min(uniqueExternalRepos * 6, 30);
+
+  // External repo diversity bonus (up to +20)
+  score += Math.min(uniqueExternalRepoCount * 4, 20);
+
+  // Merged external PRs bonus (up to +25)
+  // Getting PRs merged in external repos is a strong signal of collaboration
+  const mergedExternalPRs = externalPRs.filter(
+    (pr) => pr.isExternal && pr.merged_at !== null
+  ).length;
+  score += Math.min(mergedExternalPRs * 5, 25);
+
+  // External commit activity bonus (up to +15)
+  score += Math.min(externalContributions.totalExternalCommits * 0.3, 15);
 
   score = clamp(Math.round(score), 0, 100);
 
+  // Enhanced quips based on contribution level
+  let quip: string;
+  if (score >= 70) {
+    if (mergedExternalPRs >= 5) {
+      quip = 'The open source community celebrates you!';
+    } else {
+      quip = 'Open source hero status';
+    }
+  } else if (score >= 40) {
+    quip = 'Spreading holiday cheer';
+  } else {
+    quip = 'Your code rarely leaves home';
+  }
+
   return {
     score,
-    quip:
-      score >= 70
-        ? 'Open source hero status'
-        : score >= 40
-          ? 'Spreading holiday cheer'
-          : 'Your code rarely leaves home',
+    quip,
     stats: {
-      externalContributions: external.length,
-      uniqueRepos: uniqueExternalRepos,
+      externalContributions: externalEvents.length,
+      uniqueRepos: uniqueExternalRepoCount,
+      externalPRs: externalPRs.filter((pr) => pr.isExternal).length,
+      externalPRsMerged: mergedExternalPRs,
+      externalCommits: externalContributions.totalExternalCommits,
     },
   };
 }
@@ -303,15 +412,22 @@ export function calculateAllScores(
   reviewCount: number,
   issues: GitHubIssue[],
   events: GitHubEvent[],
-  username: string
+  username: string,
+  externalPRs: ExternalPR[] = [],
+  externalContributions: ExternalContributionSummary = emptyExternalContributions
 ): CategoryScores {
   return {
     commitConsistency: scoreCommitConsistency(commits),
     messageQuality: scoreMessageQuality(commits),
-    prHygiene: scorePRHygiene(prs),
+    prHygiene: scorePRHygiene(prs, externalPRs),
     reviewKarma: scoreReviewKarma(reviewCount, prs.length),
     issueCitizenship: scoreIssueCitizenship(issues, username),
-    collaborationSpirit: scoreCollaborationSpirit(events, username),
+    collaborationSpirit: scoreCollaborationSpirit(
+      events,
+      username,
+      externalPRs,
+      externalContributions
+    ),
   };
 }
 
@@ -380,4 +496,3 @@ export function getVerdictDetails(tier: VerdictTier): {
   };
   return details[tier];
 }
-

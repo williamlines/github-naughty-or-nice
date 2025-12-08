@@ -37,14 +37,16 @@ export async function GET(
     // Fetch GitHub data
     const data = await fetchUserData(username, token);
 
-    // Calculate scores
+    // Calculate scores (including external contributions)
     const categories = calculateAllScores(
       data.commits,
       data.pullRequests,
       data.reviewCount,
       data.issues,
       data.events,
-      username
+      username,
+      data.externalPRs,
+      data.externalContributions
     );
 
     const overallScore = calculateOverallScore(categories);
@@ -63,6 +65,10 @@ export async function GET(
       totalPRs: data.pullRequests.length,
       totalReviews: data.reviewCount,
       totalIssues: data.issues.length,
+      externalPRs: data.externalPRs.filter((pr) => pr.isExternal).length,
+      externalPRsMerged: data.externalPRs.filter(
+        (pr) => pr.isExternal && pr.merged_at !== null
+      ).length,
     };
 
     const aiSummary = await generateAIVerdict({
@@ -91,6 +97,8 @@ export async function GET(
       },
       categories,
       summary,
+      externalPRs: data.externalPRs,
+      externalContributions: data.externalContributions,
       dataCompleteness: data.dataCompleteness,
     };
 

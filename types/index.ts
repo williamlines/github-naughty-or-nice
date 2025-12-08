@@ -1,3 +1,5 @@
+import type { ExternalPR, ExternalContributionSummary } from './github';
+
 // ============ VERDICT SYSTEM ============
 
 export type VerdictTier =
@@ -52,11 +54,16 @@ export interface UserAnalysis {
     totalPRs: number;
     totalReviews: number;
     totalIssues: number;
+    externalPRs: number;
+    externalPRsMerged: number;
   };
+  externalPRs: ExternalPR[];
+  externalContributions: ExternalContributionSummary;
   dataCompleteness: {
     eventsLimited: boolean;
     reposAnalyzed: number;
     reposTotal: number;
+    externalPRsFound: number;
     note?: string;
   };
 }

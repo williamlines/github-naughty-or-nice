@@ -13,8 +13,11 @@ import {
   getRepoPRs,
   getReviewCount,
   getIssues,
+  searchUserPRs,
+  parseExternalContributions,
 } from './github';
 import { GitHubError } from './errors';
+import { GitHubEvent } from '@/types/github';
 
 describe('GitHub API Client', () => {
   beforeEach(() => {
@@ -265,6 +268,204 @@ describe('GitHub API Client', () => {
       const result = await getIssues('testuser', '2025-01-01', 'token');
 
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('searchUserPRs', () => {
+    it('returns external PRs with isExternal flag', async () => {
+      const mockSearchResult = {
+        total_count: 3,
+        incomplete_results: false,
+        items: [
+          {
+            id: 1,
+            title: 'Fix bug in external repo',
+            state: 'closed',
+            created_at: '2025-01-15T00:00:00Z',
+            closed_at: '2025-01-16T00:00:00Z',
+            repository_url: 'https://api.github.com/repos/facebook/react',
+            pull_request: { merged_at: '2025-01-16T00:00:00Z' },
+          },
+          {
+            id: 2,
+            title: 'Update docs in own repo',
+            state: 'closed',
+            created_at: '2025-01-10T00:00:00Z',
+            closed_at: '2025-01-11T00:00:00Z',
+            repository_url: 'https://api.github.com/repos/testuser/my-repo',
+            pull_request: { merged_at: '2025-01-11T00:00:00Z' },
+          },
+          {
+            id: 3,
+            title: 'Add feature to another repo',
+            state: 'open',
+            created_at: '2025-01-20T00:00:00Z',
+            closed_at: null,
+            repository_url: 'https://api.github.com/repos/vercel/next.js',
+            pull_request: { merged_at: null },
+          },
+        ],
+      };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockSearchResult,
+      });
+
+      const result = await searchUserPRs('testuser', '2025-01-01', 'token');
+
+      expect(result).toHaveLength(3);
+
+      // External PR to facebook/react
+      expect(result[0].repository).toBe('facebook/react');
+      expect(result[0].isExternal).toBe(true);
+      expect(result[0].merged_at).toBe('2025-01-16T00:00:00Z');
+
+      // Own repo PR
+      expect(result[1].repository).toBe('testuser/my-repo');
+      expect(result[1].isExternal).toBe(false);
+
+      // External PR to vercel/next.js (not merged)
+      expect(result[2].repository).toBe('vercel/next.js');
+      expect(result[2].isExternal).toBe(true);
+      expect(result[2].merged_at).toBeNull();
+    });
+
+    it('handles empty results', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ total_count: 0, incomplete_results: false, items: [] }),
+      });
+
+      const result = await searchUserPRs('testuser', '2025-01-01', 'token');
+
+      expect(result).toEqual([]);
+    });
+
+    it('returns empty array on error', async () => {
+      mockFetch.mockResolvedValueOnce({ ok: false, status: 500 });
+
+      const result = await searchUserPRs('testuser', '2025-01-01', 'token');
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('parseExternalContributions', () => {
+    it('extracts PushEvents to external repos', () => {
+      const events: GitHubEvent[] = [
+        {
+          id: '1',
+          type: 'PushEvent',
+          created_at: '2025-01-15T00:00:00Z',
+          repo: { id: 1, name: 'facebook/react' },
+          payload: { push_id: 123, size: 3, commits: [{ sha: 'a' }, { sha: 'b' }, { sha: 'c' }] },
+        },
+        {
+          id: '2',
+          type: 'PushEvent',
+          created_at: '2025-01-16T00:00:00Z',
+          repo: { id: 2, name: 'vercel/next.js' },
+          payload: { push_id: 124, size: 2, commits: [{ sha: 'd' }, { sha: 'e' }] },
+        },
+      ];
+
+      const result = parseExternalContributions(events, 'testuser');
+
+      expect(result.externalPushes).toHaveLength(2);
+      expect(result.totalExternalCommits).toBe(5);
+      expect(result.uniqueExternalRepos).toBe(2);
+    });
+
+    it('ignores events to own repos', () => {
+      const events: GitHubEvent[] = [
+        {
+          id: '1',
+          type: 'PushEvent',
+          created_at: '2025-01-15T00:00:00Z',
+          repo: { id: 1, name: 'testuser/my-repo' },
+          payload: { push_id: 123, size: 5 },
+        },
+        {
+          id: '2',
+          type: 'PushEvent',
+          created_at: '2025-01-16T00:00:00Z',
+          repo: { id: 2, name: 'facebook/react' },
+          payload: { push_id: 124, size: 2 },
+        },
+      ];
+
+      const result = parseExternalContributions(events, 'testuser');
+
+      expect(result.externalPushes).toHaveLength(1);
+      expect(result.externalPushes[0].repo).toBe('facebook/react');
+      expect(result.totalExternalCommits).toBe(2);
+    });
+
+    it('extracts PullRequestEvents to external repos', () => {
+      const events: GitHubEvent[] = [
+        {
+          id: '1',
+          type: 'PullRequestEvent',
+          created_at: '2025-01-15T00:00:00Z',
+          repo: { id: 1, name: 'facebook/react' },
+          payload: { action: 'opened', pull_request: { merged: false } },
+        },
+        {
+          id: '2',
+          type: 'PullRequestEvent',
+          created_at: '2025-01-16T00:00:00Z',
+          repo: { id: 2, name: 'facebook/react' },
+          payload: { action: 'closed', pull_request: { merged: true } },
+        },
+      ];
+
+      const result = parseExternalContributions(events, 'testuser');
+
+      expect(result.externalPRActions).toHaveLength(2);
+      expect(result.externalPRActions[0].action).toBe('opened');
+      expect(result.externalPRActions[0].merged).toBe(false);
+      expect(result.externalPRActions[1].action).toBe('closed');
+      expect(result.externalPRActions[1].merged).toBe(true);
+    });
+
+    it('calculates unique repos correctly', () => {
+      const events: GitHubEvent[] = [
+        {
+          id: '1',
+          type: 'PushEvent',
+          created_at: '2025-01-15T00:00:00Z',
+          repo: { id: 1, name: 'facebook/react' },
+          payload: { push_id: 123, size: 1 },
+        },
+        {
+          id: '2',
+          type: 'PullRequestEvent',
+          created_at: '2025-01-16T00:00:00Z',
+          repo: { id: 1, name: 'facebook/react' }, // Same repo
+          payload: { action: 'opened' },
+        },
+        {
+          id: '3',
+          type: 'PushEvent',
+          created_at: '2025-01-17T00:00:00Z',
+          repo: { id: 2, name: 'vercel/next.js' },
+          payload: { push_id: 125, size: 2 },
+        },
+      ];
+
+      const result = parseExternalContributions(events, 'testuser');
+
+      expect(result.uniqueExternalRepos).toBe(2); // facebook/react and vercel/next.js
+    });
+
+    it('returns empty summary when no events', () => {
+      const result = parseExternalContributions([], 'testuser');
+
+      expect(result.externalPushes).toEqual([]);
+      expect(result.externalPRActions).toEqual([]);
+      expect(result.uniqueExternalRepos).toBe(0);
+      expect(result.totalExternalCommits).toBe(0);
     });
   });
 });

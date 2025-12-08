@@ -5,6 +5,12 @@ import {
   GitHubPullRequest,
   GitHubIssue,
   GitHubRepo,
+  GitHubSearchResult,
+  SearchPRItem,
+  ExternalPR,
+  ExternalContributionSummary,
+  PushEventPayload,
+  PREventPayload,
 } from '@/types/github';
 import { GitHubError } from './errors';
 
@@ -145,6 +151,98 @@ export async function getIssues(
   }
 }
 
+// === External Contributions Functions ===
+
+function extractRepoFromUrl(url: string): string {
+  const match = url.match(/repos\/(.+)$/);
+  return match ? match[1] : url;
+}
+
+export async function searchUserPRs(
+  username: string,
+  since: string,
+  token: string
+): Promise<ExternalPR[]> {
+  try {
+    const result = await fetchGitHub<GitHubSearchResult<SearchPRItem>>(
+      `/search/issues?q=author:${username}+type:pr+created:>=${since}&per_page=100`,
+      token
+    );
+
+    return result.items.map((item) => ({
+      id: item.id,
+      title: item.title,
+      state: item.state,
+      created_at: item.created_at,
+      closed_at: item.closed_at,
+      merged_at: item.pull_request?.merged_at || null,
+      repository: extractRepoFromUrl(item.repository_url),
+      isExternal: !item.repository_url
+        .toLowerCase()
+        .includes(`/${username.toLowerCase()}/`),
+    }));
+  } catch (error) {
+    console.error('Failed to fetch external PRs:', error);
+    return [];
+  }
+}
+
+export function parseExternalContributions(
+  events: GitHubEvent[],
+  username: string
+): ExternalContributionSummary {
+  const externalPushes: Array<{
+    repo: string;
+    commitCount: number;
+    date: string;
+  }> = [];
+  const externalPRActions: Array<{
+    repo: string;
+    action: string;
+    merged: boolean;
+    date: string;
+  }> = [];
+
+  const usernamePrefix = `${username.toLowerCase()}/`;
+
+  events.forEach((event) => {
+    const isExternal = !event.repo.name.toLowerCase().startsWith(usernamePrefix);
+    if (!isExternal) return;
+
+    if (event.type === 'PushEvent') {
+      const payload = event.payload as unknown as PushEventPayload;
+      externalPushes.push({
+        repo: event.repo.name,
+        commitCount: payload.commits?.length || payload.size || 0,
+        date: event.created_at,
+      });
+    }
+
+    if (event.type === 'PullRequestEvent') {
+      const payload = event.payload as unknown as PREventPayload;
+      externalPRActions.push({
+        repo: event.repo.name,
+        action: payload.action || 'opened',
+        merged: payload.pull_request?.merged || false,
+        date: event.created_at,
+      });
+    }
+  });
+
+  return {
+    externalPushes,
+    externalPRActions,
+    uniqueExternalRepos: new Set([
+      ...externalPushes.map((p) => p.repo),
+      ...externalPRActions.map((p) => p.repo),
+    ]).size,
+    totalExternalCommits: externalPushes.reduce(
+      (sum, p) => sum + p.commitCount,
+      0
+    ),
+  };
+}
+
 // Main data fetcher
 export interface RawGitHubData {
   user: GitHubUser;
@@ -153,10 +251,13 @@ export interface RawGitHubData {
   pullRequests: GitHubPullRequest[];
   reviewCount: number;
   issues: GitHubIssue[];
+  externalPRs: ExternalPR[];
+  externalContributions: ExternalContributionSummary;
   dataCompleteness: {
     eventsLimited: boolean;
     reposAnalyzed: number;
     reposTotal: number;
+    externalPRsFound: number;
   };
 }
 
@@ -166,12 +267,19 @@ export async function fetchUserData(
 ): Promise<RawGitHubData> {
   const year = new Date().getFullYear();
   const since = `${year}-01-01T00:00:00Z`;
+  const sinceDate = since.split('T')[0];
 
   const user = await getUser(username, token);
-  const [events, repos] = await Promise.all([
+  
+  // Fetch events, repos, and external PRs in parallel
+  const [events, repos, externalPRs] = await Promise.all([
     getEvents(username, token),
     getRepos(username, token),
+    searchUserPRs(username, sinceDate, token),
   ]);
+
+  // Parse external contributions from events
+  const externalContributions = parseExternalContributions(events, username);
 
   // Get active repos from this year (limit to 10)
   const activeRepos = repos
@@ -196,8 +304,8 @@ export async function fetchUserData(
   const pullRequests = repoData.flatMap((r) => r.prs);
 
   const [reviewCount, issues] = await Promise.all([
-    getReviewCount(username, since.split('T')[0], token),
-    getIssues(username, since.split('T')[0], token),
+    getReviewCount(username, sinceDate, token),
+    getIssues(username, sinceDate, token),
   ]);
 
   return {
@@ -207,10 +315,13 @@ export async function fetchUserData(
     pullRequests,
     reviewCount,
     issues,
+    externalPRs,
+    externalContributions,
     dataCompleteness: {
       eventsLimited: events.length >= 300,
       reposAnalyzed: activeRepos.length,
       reposTotal: repos.length,
+      externalPRsFound: externalPRs.length,
     },
   };
 }

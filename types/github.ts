@@ -59,3 +59,49 @@ export interface GitHubSearchResult<T> {
   incomplete_results: boolean;
   items: T[];
 }
+
+// === External Contributions Types ===
+
+export interface SearchPRItem {
+  id: number;
+  title: string;
+  state: 'open' | 'closed';
+  created_at: string;
+  closed_at: string | null;
+  repository_url: string;
+  pull_request?: { merged_at: string | null };
+}
+
+export interface ExternalPR {
+  id: number;
+  title: string;
+  state: 'open' | 'closed';
+  created_at: string;
+  closed_at: string | null;
+  merged_at: string | null;
+  repository: string;
+  isExternal: boolean;
+}
+
+export interface ExternalContributionSummary {
+  externalPushes: Array<{ repo: string; commitCount: number; date: string }>;
+  externalPRActions: Array<{
+    repo: string;
+    action: string;
+    merged: boolean;
+    date: string;
+  }>;
+  uniqueExternalRepos: number;
+  totalExternalCommits: number;
+}
+
+export interface PushEventPayload {
+  push_id: number;
+  size: number;
+  commits?: Array<{ sha: string; message: string }>;
+}
+
+export interface PREventPayload {
+  action: 'opened' | 'closed' | 'merged' | 'reopened';
+  pull_request?: { merged: boolean };
+}
