@@ -51,7 +51,7 @@ export function scoreCommitConsistency(
   const normalizedVariance = Math.min(variance / 100, 1);
 
   const score = clamp(
-    Math.round(coverageRatio * 70 + (1 - normalizedVariance) * 30),
+    Math.round(coverageRatio * 70 + (1 - normalizedVariance) * 30 + 10),
     0,
     100
   );
@@ -97,7 +97,7 @@ export function scoreMessageQuality(
     (messages.filter((m) => conventional.test(m)).length / messages.length) *
     100;
 
-  let score = 50;
+  let score = 55;
   if (avgLength >= 50) score += 25;
   else if (avgLength >= 30) score += 15;
   else if (avgLength >= 20) score += 5;
@@ -227,8 +227,8 @@ export function scoreReviewKarma(
 
   const karmaRatio = prsAuthored > 0 ? reviewCount / prsAuthored : reviewCount;
 
-  let score = 30;
-  score += Math.min(reviewCount * 4, 40);
+  let score = 35;
+  score += Math.min(reviewCount * 5, 40);
   if (karmaRatio >= 1.0) score += 30;
   else if (karmaRatio >= 0.5) score += 20;
   else if (karmaRatio >= 0.25) score += 10;
@@ -270,7 +270,7 @@ export function scoreIssueCitizenship(
 
   const closeRatio = closed.length / opened.length;
 
-  let score = 40;
+  let score = 45;
   score += closeRatio * 40;
 
   const closeTimes = closed
@@ -358,7 +358,7 @@ export function scoreCollaborationSpirit(
   ]);
   const uniqueExternalRepoCount = allUniqueExternalRepos.size;
 
-  let score = 30;
+  let score = 35;
 
   // Base score from event activity
   score += Math.min(externalPercent / 2.5, 40);
@@ -439,12 +439,12 @@ export function calculateOverallScore(categories: CategoryScores): number {
 
 // Verdict tier
 export function getVerdictTier(score: number): VerdictTier {
-  if (score >= 90) return 'extremely-nice';
-  if (score >= 75) return 'very-nice';
-  if (score >= 60) return 'sort-of-nice';
-  if (score >= 45) return 'borderline';
-  if (score >= 30) return 'sort-of-naughty';
-  if (score >= 15) return 'very-naughty';
+  if (score >= 85) return 'extremely-nice';
+  if (score >= 70) return 'very-nice';
+  if (score >= 55) return 'sort-of-nice';
+  if (score >= 40) return 'borderline';
+  if (score >= 25) return 'sort-of-naughty';
+  if (score >= 12) return 'very-naughty';
   return 'extremely-naughty';
 }
 

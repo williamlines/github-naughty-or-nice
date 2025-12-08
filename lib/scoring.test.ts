@@ -448,7 +448,7 @@ describe('scoreIssueCitizenship', () => {
       createIssue('testuser', 'closed', 5),
     ];
     const result = scoreIssueCitizenship(issues, 'testuser');
-    expect(result.score).toBeLessThan(70);
+    expect(result.score).toBeLessThan(80);
     expect(result.stats.issuesOpened).toBe(4);
     expect(result.stats.issuesClosed).toBe(1);
   });
@@ -598,13 +598,13 @@ describe('scoreCollaborationSpirit', () => {
         withoutCommits
       );
 
-      // withCommits: base 30 + 15 (commit bonus) = 45
-      // withoutCommits: base 30 = 30 (but returns 50 for no activity)
+      // withCommits: base 35 + 15 (commit bonus) = 50
+      // withoutCommits: base 35 = 35 (but returns 50 for no activity)
       // Actually, withoutCommits has no activity, so returns 50 as default
       // withCommits has activity (totalExternalCommits > 0), so gets calculated
       expect(scoreWithCommits.stats.externalCommits).toBe(50);
       // The important thing is that the bonus is applied correctly
-      expect(scoreWithCommits.score).toBe(45); // 30 base + 15 commit bonus (capped)
+      expect(scoreWithCommits.score).toBe(50); // 35 base + 15 commit bonus (capped)
     });
 
     it('caps bonuses correctly', () => {
@@ -761,38 +761,38 @@ describe('calculateOverallScore', () => {
 // ============ VERDICT TIER TESTS ============
 
 describe('getVerdictTier', () => {
-  it('returns extremely-nice for score >= 90', () => {
-    expect(getVerdictTier(90)).toBe('extremely-nice');
+  it('returns extremely-nice for score >= 85', () => {
+    expect(getVerdictTier(85)).toBe('extremely-nice');
     expect(getVerdictTier(100)).toBe('extremely-nice');
   });
 
-  it('returns very-nice for score 75-89', () => {
-    expect(getVerdictTier(75)).toBe('very-nice');
-    expect(getVerdictTier(89)).toBe('very-nice');
+  it('returns very-nice for score 70-84', () => {
+    expect(getVerdictTier(70)).toBe('very-nice');
+    expect(getVerdictTier(84)).toBe('very-nice');
   });
 
-  it('returns sort-of-nice for score 60-74', () => {
-    expect(getVerdictTier(60)).toBe('sort-of-nice');
-    expect(getVerdictTier(74)).toBe('sort-of-nice');
+  it('returns sort-of-nice for score 55-69', () => {
+    expect(getVerdictTier(55)).toBe('sort-of-nice');
+    expect(getVerdictTier(69)).toBe('sort-of-nice');
   });
 
-  it('returns borderline for score 45-59', () => {
-    expect(getVerdictTier(45)).toBe('borderline');
-    expect(getVerdictTier(59)).toBe('borderline');
+  it('returns borderline for score 40-54', () => {
+    expect(getVerdictTier(40)).toBe('borderline');
+    expect(getVerdictTier(54)).toBe('borderline');
   });
 
-  it('returns sort-of-naughty for score 30-44', () => {
-    expect(getVerdictTier(30)).toBe('sort-of-naughty');
-    expect(getVerdictTier(44)).toBe('sort-of-naughty');
+  it('returns sort-of-naughty for score 25-39', () => {
+    expect(getVerdictTier(25)).toBe('sort-of-naughty');
+    expect(getVerdictTier(39)).toBe('sort-of-naughty');
   });
 
-  it('returns very-naughty for score 15-29', () => {
-    expect(getVerdictTier(15)).toBe('very-naughty');
-    expect(getVerdictTier(29)).toBe('very-naughty');
+  it('returns very-naughty for score 12-24', () => {
+    expect(getVerdictTier(12)).toBe('very-naughty');
+    expect(getVerdictTier(24)).toBe('very-naughty');
   });
 
-  it('returns extremely-naughty for score < 15', () => {
-    expect(getVerdictTier(14)).toBe('extremely-naughty');
+  it('returns extremely-naughty for score < 12', () => {
+    expect(getVerdictTier(11)).toBe('extremely-naughty');
     expect(getVerdictTier(0)).toBe('extremely-naughty');
   });
 });
