@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { use } from 'react';
 import Link from 'next/link';
 import { AnalysisResponse, UserAnalysis, ErrorCode } from '@/types';
@@ -19,8 +19,13 @@ export default function ResultsPage({
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<UserAnalysis | null>(null);
   const [error, setError] = useState<ErrorCode | null>(null);
+  const hasFetched = useRef(false);
 
   useEffect(() => {
+    // Prevent duplicate fetches in React Strict Mode (development)
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+
     const fetchAnalysis = async () => {
       try {
         const res = await fetch(`/api/analyze/${username}`);
