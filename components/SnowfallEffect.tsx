@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 
 export function SnowfallEffect() {
   const [enabled, setEnabled] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const saved = localStorage.getItem('snowfall-enabled');
     if (saved !== null) setEnabled(saved === 'true');
   }, []);
@@ -31,8 +33,8 @@ export function SnowfallEffect() {
         </label>
       </div>
 
-      {/* Snowflakes */}
-      {enabled && (
+      {/* Snowflakes - only render on client to avoid hydration mismatch */}
+      {mounted && enabled && (
         <div className="snowfall-container">
           {Array.from({ length: 50 }).map((_, i) => (
             <div
