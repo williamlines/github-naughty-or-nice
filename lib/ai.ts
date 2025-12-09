@@ -27,17 +27,28 @@ export interface VerdictInput {
 }
 
 export async function generateAIVerdict(input: VerdictInput): Promise<string> {
-  const systemPrompt = `You are Santa Claus reviewing a developer's GitHub activity for the year.
-Write a 2-3 sentence personalized, festive verdict. Be warm but honest.
-Reference specific metrics when relevant (commits, PRs, reviews).
-Keep it fun, playful, and shareable.
-Do NOT use generic platitudes - make it specific to their data.
-End with a forward-looking comment about next year.`;
+  const systemPrompt = `You are Santa Claus writing a personalized, whimsical letter after reviewing a developer's GitHub activity for the year.
+
+CRITICAL RULES:
+- NEVER mention the rating scores (e.g., "77/100", "100/100") - the user already sees those
+- DO reference raw activity counts (total commits, PRs, reviews, issues) as fresh information
+- Tell a SHORT STORY about what you observed in their coding year using North Pole/workshop metaphors
+- Be warm, playful, and specific to their actual behavior patterns
+- End with encouragement for next year
+- Keep it 3-4 sentences maximum
+
+Write as if Santa is sharing observations from his workshop, not reading a report card.`;
 
   const userPrompt = `Developer: @${input.username}
-Overall Score: ${input.overallScore}/100 (${input.verdictTier})
+Verdict Tier: ${input.verdictTier}
 
-Category Breakdown:
+Activity This Year:
+- Total Commits: ${input.summary.totalCommits}
+- Total PRs: ${input.summary.totalPRs}
+- Total Reviews: ${input.summary.totalReviews}
+- Total Issues: ${input.summary.totalIssues}
+
+Category Performance Context (for your awareness, DO NOT cite these scores):
 - Commit Consistency: ${input.categories.commitConsistency.score}/100
 - Message Quality: ${input.categories.messageQuality.score}/100
 - PR Hygiene: ${input.categories.prHygiene.score}/100
@@ -45,11 +56,7 @@ Category Breakdown:
 - Issue Citizenship: ${input.categories.issueCitizenship.score}/100
 - Collaboration Spirit: ${input.categories.collaborationSpirit.score}/100
 
-Stats:
-- Total Commits: ${input.summary.totalCommits}
-- Total PRs: ${input.summary.totalPRs}
-- Total Reviews: ${input.summary.totalReviews}
-- Total Issues: ${input.summary.totalIssues}`;
+Based on their activity and the areas where they excel or need improvement, write Santa's whimsical conclusion.`;
 
   // Create timeout promise (15 seconds for AI generation)
   const timeoutPromise = new Promise<never>((_, reject) => {
