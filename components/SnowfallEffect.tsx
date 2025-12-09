@@ -1,16 +1,30 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 export function SnowfallEffect() {
   const [enabled, setEnabled] = useState(true);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     const saved = localStorage.getItem('snowfall-enabled');
     if (saved !== null) setEnabled(saved === 'true');
   }, []);
+
+  // Memoize snowflake properties to prevent reset on parent re-renders
+  const snowflakes = useMemo(
+    () =>
+      Array.from({ length: 50 }).map((_, i) => {
+        const duration = 10 + Math.random() * 10;
+        return {
+          id: i,
+          left: `${Math.random() * 100}%`,
+          animationDuration: `${duration}s`,
+          // Negative delay makes animation start mid-cycle for "already running" effect
+          animationDelay: `${-Math.random() * duration}s`,
+        };
+      }),
+    []
+  );
 
   const handleToggle = () => {
     const newValue = !enabled;
@@ -33,18 +47,19 @@ export function SnowfallEffect() {
         </label>
       </div>
 
-      {/* Snowflakes - only render on client to avoid hydration mismatch */}
-      {mounted && enabled && (
-        <div className="snowfall-container">
-          {Array.from({ length: 50 }).map((_, i) => (
+      {/* Snowflakes */}
+      {enabled && (
+        <div className="snowfall-container" suppressHydrationWarning>
+          {snowflakes.map((flake) => (
             <div
-              key={i}
+              key={flake.id}
               className="snowflake"
               style={{
-                left: `${Math.random() * 100}%`,
-                animationDuration: `${10 + Math.random() * 10}s`,
-                animationDelay: `${Math.random() * 10}s`,
+                left: flake.left,
+                animationDuration: flake.animationDuration,
+                animationDelay: flake.animationDelay,
               }}
+              suppressHydrationWarning
             >
               ❄
             </div>

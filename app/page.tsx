@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { SnowfallEffect } from '@/components/SnowfallEffect';
 
 export default function Home() {
   const [username, setUsername] = useState('');
@@ -28,17 +27,14 @@ export default function Home() {
   };
 
   return (
-    <>
-      <SnowfallEffect />
-      <main className="flex min-h-screen flex-col items-center justify-center p-6">
+    <main className="flex min-h-screen flex-col items-center justify-center p-6">
       <div className="text-center max-w-2xl mx-auto">
         {/* Header */}
         <h1 className="text-4xl md:text-6xl font-bold mb-4 pb-2 bg-gradient-to-r from-[#8b181d] via-[#325632] to-[#8b181d] bg-clip-text text-transparent">
           Naughty or Nice?
         </h1>
         <p className="text-lg md:text-xl text-slate-700 mb-8">
-          Enter your GitHub username to find out if you&apos;re getting code or
-          coal this year 🎄
+          See if Santa&apos;s putting you on the nice list (or the deprecated list) 📜
         </p>
 
         {/* Form */}
@@ -80,6 +76,5 @@ export default function Home() {
         </p>
       </div>
     </main>
-    </>
   );
 }

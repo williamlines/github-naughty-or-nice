@@ -31,7 +31,7 @@ body {
 
 .snowflake {
   position: absolute;
-  top: -10px;
+  top: -200px;
   color: #a5c9d8;
   font-size: 1.5rem;
   animation: snowfall linear infinite;
@@ -45,10 +45,16 @@ body {
 @keyframes snowfall {
   0% {
     transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% {
     opacity: 1;
+  }
+  90% {
+    opacity: 0.8;
   }
   100% {
     transform: translateY(100vh) translateX(50px);
-    opacity: 0.3;
+    opacity: 0;
   }
 }
