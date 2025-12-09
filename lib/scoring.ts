@@ -29,7 +29,7 @@ export function scoreCommitConsistency(
 ): CategoryScores['commitConsistency'] {
   if (commits.length === 0) {
     return {
-      score: 50,
+      score: 0,
       quip: 'No commits to analyze',
       stats: { totalCommits: 0, activeWeeks: 0 },
     };
@@ -51,8 +51,8 @@ export function scoreCommitConsistency(
   const normalizedVariance = Math.min(variance / 100, 1);
 
   const score = clamp(
-    Math.round(coverageRatio * 70 + (1 - normalizedVariance) * 30 + 10),
-    0,
+    Math.round(coverageRatio * 70 + (1 - normalizedVariance) * 30 + 20),
+    50,
     100
   );
 
@@ -78,7 +78,7 @@ export function scoreMessageQuality(
   commits: GitHubCommit[]
 ): CategoryScores['messageQuality'] {
   if (commits.length === 0) {
-    return { score: 50, quip: 'No messages to judge', stats: {} };
+    return { score: 0, quip: 'No messages to judge', stats: {} };
   }
 
   const messages = commits.map((c) => c.commit.message.split('\n')[0]);
@@ -107,7 +107,7 @@ export function scoreMessageQuality(
   score -= Math.min(lowEffortPercent, 20);
   score += Math.min(conventionalPercent / 5, 20);
 
-  score = clamp(Math.round(score), 0, 100);
+  score = clamp(Math.round(score), 50, 100);
 
   return {
     score,
@@ -135,7 +135,7 @@ export function scorePRHygiene(
 
   if (totalPRCount === 0) {
     return {
-      score: 50,
+      score: 0,
       quip: 'No PRs on record',
       stats: { totalPRs: 0, mergeRate: 0, avgLinesChanged: 0 },
     };
@@ -180,7 +180,7 @@ export function scorePRHygiene(
   // Getting PRs merged in external repos shows strong contribution skills
   score += Math.min(externalMerged * 2, 10);
 
-  score = clamp(Math.round(score), 0, 100);
+  score = clamp(Math.round(score), 50, 100);
 
   // Enhanced quips based on merge rate and external contributions
   let quip: string;
@@ -219,7 +219,7 @@ export function scoreReviewKarma(
 ): CategoryScores['reviewKarma'] {
   if (prsAuthored === 0 && reviewCount === 0) {
     return {
-      score: 50,
+      score: 0,
       quip: 'No reviews on record',
       stats: { reviewsGiven: 0, prsAuthored: 0 },
     };
@@ -233,7 +233,7 @@ export function scoreReviewKarma(
   else if (karmaRatio >= 0.5) score += 20;
   else if (karmaRatio >= 0.25) score += 10;
 
-  score = clamp(Math.round(score), 0, 100);
+  score = clamp(Math.round(score), 50, 100);
 
   return {
     score,
@@ -262,7 +262,7 @@ export function scoreIssueCitizenship(
 
   if (opened.length === 0) {
     return {
-      score: 50,
+      score: 0,
       quip: 'Issue-free zone',
       stats: { issuesOpened: 0, issuesClosed: 0 },
     };
@@ -286,7 +286,7 @@ export function scoreIssueCitizenship(
   else if (avgCloseTime < 14) score += 15;
   else if (avgCloseTime < 30) score += 10;
 
-  score = clamp(Math.round(score), 0, 100);
+  score = clamp(Math.round(score), 50, 100);
 
   return {
     score,
@@ -328,7 +328,7 @@ export function scoreCollaborationSpirit(
 
   if (!hasExternalActivity) {
     return {
-      score: 50,
+      score: 0,
       quip: 'Flying solo',
       stats: { externalContributions: 0 },
     };
@@ -376,7 +376,7 @@ export function scoreCollaborationSpirit(
   // External commit activity bonus (up to +15)
   score += Math.min(externalContributions.totalExternalCommits * 0.3, 15);
 
-  score = clamp(Math.round(score), 0, 100);
+  score = clamp(Math.round(score), 50, 100);
 
   // Enhanced quips based on contribution level
   let quip: string;

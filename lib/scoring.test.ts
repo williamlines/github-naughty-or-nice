@@ -118,9 +118,9 @@ function createExternalContributions(
 // ============ COMMIT CONSISTENCY TESTS ============
 
 describe('scoreCommitConsistency', () => {
-  it('returns score 50 for empty commits array', () => {
+  it('returns score 0 for empty commits array', () => {
     const result = scoreCommitConsistency([]);
-    expect(result.score).toBe(50);
+    expect(result.score).toBe(0);
     expect(result.quip).toBe('No commits to analyze');
     expect(result.stats.totalCommits).toBe(0);
   });
@@ -158,9 +158,9 @@ describe('scoreCommitConsistency', () => {
 // ============ MESSAGE QUALITY TESTS ============
 
 describe('scoreMessageQuality', () => {
-  it('returns score 50 for empty commits array', () => {
+  it('returns score 0 for empty commits array', () => {
     const result = scoreMessageQuality([]);
-    expect(result.score).toBe(50);
+    expect(result.score).toBe(0);
     expect(result.quip).toBe('No messages to judge');
   });
 
@@ -176,7 +176,7 @@ describe('scoreMessageQuality', () => {
     expect(result.stats.conventionalPercent).toBe(100);
   });
 
-  it('returns lower score for low-effort messages', () => {
+  it('returns floor score of 50 for low-effort messages', () => {
     const commits = [
       createCommit('fix'),
       createCommit('wip'),
@@ -184,13 +184,13 @@ describe('scoreMessageQuality', () => {
       createCommit('asdf'),
     ];
     const result = scoreMessageQuality(commits);
-    expect(result.score).toBeLessThan(50);
+    expect(result.score).toBe(50);
   });
 
-  it('penalizes very short messages', () => {
+  it('applies floor of 50 for very short messages', () => {
     const commits = [createCommit('a'), createCommit('b'), createCommit('xyz')];
     const result = scoreMessageQuality(commits);
-    expect(result.score).toBeLessThan(50);
+    expect(result.score).toBe(50);
   });
 
   it('rewards longer descriptive messages', () => {
@@ -213,9 +213,9 @@ describe('scoreMessageQuality', () => {
 // ============ PR HYGIENE TESTS ============
 
 describe('scorePRHygiene', () => {
-  it('returns score 50 for empty PRs array', () => {
+  it('returns score 0 for empty PRs array', () => {
     const result = scorePRHygiene([]);
-    expect(result.score).toBe(50);
+    expect(result.score).toBe(0);
     expect(result.quip).toBe('No PRs on record');
     expect(result.stats.totalPRs).toBe(0);
     expect(result.stats.mergeRate).toBe(0);
@@ -231,14 +231,14 @@ describe('scorePRHygiene', () => {
     expect(result.score).toBeGreaterThan(60);
   });
 
-  it('returns lower score for mega PRs', () => {
+  it('applies floor of 50 for mega PRs', () => {
     const prs = [
       createPR(800, 500, true), // 1300 lines
       createPR(1000, 600, true), // 1600 lines
       createPR(1200, 400, true), // 1600 lines
     ];
     const result = scorePRHygiene(prs);
-    expect(result.score).toBeLessThan(50);
+    expect(result.score).toBe(50);
   });
 
   it('calculates average lines correctly', () => {
@@ -396,9 +396,9 @@ describe('scorePRHygiene', () => {
 // ============ REVIEW KARMA TESTS ============
 
 describe('scoreReviewKarma', () => {
-  it('returns score 50 for no reviews and no PRs', () => {
+  it('returns score 0 for no reviews and no PRs', () => {
     const result = scoreReviewKarma(0, 0);
-    expect(result.score).toBe(50);
+    expect(result.score).toBe(0);
     expect(result.quip).toBe('No reviews on record');
   });
 
@@ -408,9 +408,9 @@ describe('scoreReviewKarma', () => {
     expect(result.quip).toContain('champion');
   });
 
-  it('returns lower score for poor review ratio', () => {
+  it('applies floor of 50 for poor review ratio', () => {
     const result = scoreReviewKarma(1, 20); // 0.05:1 ratio
-    expect(result.score).toBeLessThan(50);
+    expect(result.score).toBe(50);
   });
 
   it('handles reviewers who only review (no PRs authored)', () => {
@@ -423,9 +423,9 @@ describe('scoreReviewKarma', () => {
 // ============ ISSUE CITIZENSHIP TESTS ============
 
 describe('scoreIssueCitizenship', () => {
-  it('returns score 50 for no issues', () => {
+  it('returns score 0 for no issues', () => {
     const result = scoreIssueCitizenship([], 'testuser');
-    expect(result.score).toBe(50);
+    expect(result.score).toBe(0);
     expect(result.quip).toBe('Issue-free zone');
   });
 
@@ -476,20 +476,20 @@ describe('scoreIssueCitizenship', () => {
 // ============ COLLABORATION SPIRIT TESTS ============
 
 describe('scoreCollaborationSpirit', () => {
-  it('returns score 50 for no contribution events', () => {
+  it('returns score 0 for no contribution events', () => {
     const result = scoreCollaborationSpirit([], 'testuser');
-    expect(result.score).toBe(50);
+    expect(result.score).toBe(0);
     expect(result.quip).toBe('Flying solo');
   });
 
-  it('returns lower score for only own repo contributions', () => {
+  it('applies floor of 50 for only own repo contributions', () => {
     const events = [
       createEvent('PushEvent', 'testuser/my-repo'),
       createEvent('PullRequestEvent', 'testuser/another-repo'),
       createEvent('IssuesEvent', 'testuser/third-repo'),
     ];
     const result = scoreCollaborationSpirit(events, 'testuser');
-    expect(result.score).toBeLessThan(50);
+    expect(result.score).toBe(50);
     expect(result.stats.externalContributions).toBe(0);
   });
 
@@ -506,14 +506,14 @@ describe('scoreCollaborationSpirit', () => {
     expect(result.stats.uniqueRepos).toBe(3);
   });
 
-  it('ignores non-contribution event types', () => {
+  it('returns 0 for non-contribution event types', () => {
     const events = [
       createEvent('WatchEvent', 'facebook/react'),
       createEvent('ForkEvent', 'vercel/next.js'),
       createEvent('StarEvent', 'microsoft/typescript'),
     ];
     const result = scoreCollaborationSpirit(events, 'testuser');
-    expect(result.score).toBe(50);
+    expect(result.score).toBe(0);
   });
 
   // Tests for external contributions functionality
@@ -719,8 +719,8 @@ describe('calculateAllScores', () => {
   it('works without external data (backward compatible)', () => {
     const result = calculateAllScores([], [], 0, [], [], 'testuser');
 
-    expect(result.prHygiene.score).toBe(50);
-    expect(result.collaborationSpirit.score).toBe(50);
+    expect(result.prHygiene.score).toBe(0);
+    expect(result.collaborationSpirit.score).toBe(0);
   });
 });
 
