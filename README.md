@@ -2,13 +2,6 @@
 
 A festive Next.js app that analyzes your GitHub activity for the year and delivers a verdict from Santa... or Krampus.
 
-## ✨ Features
-
-- **Smart Scoring System**: Analyzes 6 categories of GitHub activity (commits, PRs, reviews, issues, collaboration)
-- **Dual Personalities**: Get encouragement from Santa for good scores (≥50) or darkly humorous messages from Krampus for low scores (<50)
-- **AI-Powered Summaries**: Personalized verdicts using OpenAI GPT-4o-mini
-- **Beautiful UI**: Festive design with snowfall animation and responsive layout
-- **Comprehensive Analysis**: Tracks external contributions, merge rates, and collaboration patterns
 
 ## 🚀 Getting Started
 
@@ -41,7 +34,7 @@ The app needs a GitHub token to fetch user activity data.
 2. Click **"Generate new token"** → **"Generate new token (classic)"**
 3. Configure the token:
    - **Note**: `GitHub Naughty or Nice App`
-   - **Expiration**: Choose your preferred expiration (90 days recommended)
+   - **Expiration**: Choose your preferred expiration
    - **Scopes**: Select the following:
      - ✅ `public_repo` (to read public repositories)
      - ✅ `read:user` (to read user profile data)
@@ -189,13 +182,13 @@ Edit `lib/ai.ts` to modify:
 - The app is optimized to minimize API calls
 - If rate limited, wait an hour or use a different GitHub account
 
+## 👨‍💻 Author
+
+Built by [William Lines](https://github.com/williamlines) using the [BMAD (Build, Measure, Analyze, Deploy) method](https://github.com/anthropics/anthropic-quickstarts/tree/main/bmad).
+
 ## 📝 License
 
 MIT
-
-## 🤝 Contributing
-
-Contributions welcome! Please open an issue or submit a PR.
 
 ## 🎄 Happy Holidays!
 
