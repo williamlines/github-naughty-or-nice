@@ -33,7 +33,7 @@ export default function Home() {
       <main className="flex min-h-screen flex-col items-center justify-center p-6">
       <div className="text-center max-w-2xl mx-auto">
         {/* Header */}
-        <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-[#8b181d] via-[#325632] to-[#8b181d] bg-clip-text text-transparent">
+        <h1 className="text-4xl md:text-6xl font-bold mb-4 pb-2 bg-gradient-to-r from-[#8b181d] via-[#325632] to-[#8b181d] bg-clip-text text-transparent">
           Naughty or Nice?
         </h1>
         <p className="text-lg md:text-xl text-slate-700 mb-8">
