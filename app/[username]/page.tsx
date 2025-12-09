@@ -74,7 +74,7 @@ export default function ResultsPage({
         />
 
         {/* AI Summary */}
-        <AISummary summary={data.verdict.aiSummary} />
+        <AISummary summary={data.verdict.aiSummary} score={data.verdict.score} />
 
         {/* Score Breakdown */}
         <ScoreBreakdown categories={data.categories} />

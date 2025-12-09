@@ -62,7 +62,7 @@ describe('getFallbackVerdict', () => {
     const result = getFallbackVerdict(input);
 
     expect(result).toContain('@testuser');
-    expect(result).toContain('debating');
+    expect(result).toContain('shadows');
   });
 
   it('returns verdict for sort-of-naughty tier', () => {
@@ -80,7 +80,7 @@ describe('getFallbackVerdict', () => {
     const result = getFallbackVerdict(input);
 
     expect(result).toContain('@testuser');
-    expect(result).toContain('disappointed');
+    expect(result).toContain('chains');
   });
 
   it('returns verdict for extremely-naughty tier', () => {
@@ -88,7 +88,7 @@ describe('getFallbackVerdict', () => {
     const result = getFallbackVerdict(input);
 
     expect(result).toContain('@testuser');
-    expect(result).toContain('Scrooge');
+    expect(result).toContain('cobwebs');
   });
 
   it('includes username in all verdicts', () => {

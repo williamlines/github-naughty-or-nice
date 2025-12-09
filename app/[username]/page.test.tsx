@@ -35,7 +35,7 @@ vi.mock('@/components/ScoreBreakdown', () => ({
 }));
 
 vi.mock('@/components/AISummary', () => ({
-  AISummary: ({ summary }: { summary: string }) => (
+  AISummary: ({ summary, score }: { summary: string; score: number }) => (
     <div data-testid="ai-summary">{summary}</div>
   ),
 }));

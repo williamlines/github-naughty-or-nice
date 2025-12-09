@@ -27,7 +27,20 @@ export interface VerdictInput {
 }
 
 export async function generateAIVerdict(input: VerdictInput): Promise<string> {
-  const systemPrompt = `You are Santa Claus writing a personalized, whimsical letter after reviewing a developer's GitHub activity for the year.
+  const systemPrompt = input.overallScore < 50
+    ? `You are Krampus writing a darkly humorous message after reviewing a developer's GitHub activity for the year.
+
+CRITICAL RULES:
+- NEVER mention the rating scores (e.g., "77/100", "100/100") - the user already sees those
+- DO reference raw activity counts (total commits, PRs, reviews, issues) as fresh information
+- Tell a SHORT STORY with dark humor about their lackluster coding year
+- Be playfully menacing but ultimately motivational - threaten coal but hint at redemption
+- Use underworld/punishment metaphors instead of North Pole ones
+- End with a darkly comedic threat OR a chance for redemption next year
+- Keep it 3-4 sentences maximum
+
+Write as if Krampus is reviewing their GitHub activity with disappointed amusement.`
+    : `You are Santa Claus writing a personalized, whimsical letter after reviewing a developer's GitHub activity for the year.
 
 CRITICAL RULES:
 - NEVER mention the rating scores (e.g., "77/100", "100/100") - the user already sees those
@@ -89,10 +102,10 @@ export function getFallbackVerdict(input: VerdictInput): string {
     'extremely-nice': `Ho ho ho! @${input.username}, you've been absolutely wonderful this year with ${input.summary.totalCommits} commits! Santa's workshop could use someone like you. Keep spreading the code cheer in the new year!`,
     'very-nice': `@${input.username}, Santa is impressed! ${input.summary.totalCommits} commits and ${input.summary.totalPRs} PRs show real dedication. You're definitely on the nice list this year. Keep up the great work!`,
     'sort-of-nice': `@${input.username}, you've been mostly nice this year. ${input.summary.totalCommits} commits show effort, though the elves noticed some room for improvement. A little more consistency next year and you'll be golden!`,
-    borderline: `@${input.username}, the elves are still debating your case. ${input.summary.totalCommits} commits is a start, but Santa sees untapped potential. New year, new opportunities to shine!`,
-    'sort-of-naughty': `@${input.username}, coal is looking likely this year. Only ${input.summary.totalCommits} commits and ${input.summary.totalReviews} reviews? The elves expected more. But hey, there's always next year to redeem yourself!`,
-    'very-naughty': `@${input.username}, Santa's a bit disappointed. The workshop records show minimal activity this year. But remember, every commit journey starts with a single push. Make next year count!`,
-    'extremely-naughty': `@${input.username}... we need to talk. The elves found almost nothing in your GitHub stocking this year. But fear not! Even Scrooge got a redemption arc. Let's make next year legendary!`,
+    borderline: `@${input.username}, I've been watching from the shadows... ${input.summary.totalCommits} commits barely kept you off my list. The chains rattle louder with each inactive week. Prove me wrong next year, or I'll be back with my bundle of switches.`,
+    'sort-of-naughty': `@${input.username}, my sack of coal has your name on it. ${input.summary.totalCommits} commits and ${input.summary.totalReviews} reviews? Pathetic. I'm sharpening my horns as we speak. Redeem yourself next year... if you dare.`,
+    'very-naughty': `@${input.username}, *rattles chains menacingly* Your GitHub looks like a graveyard. ${input.summary.totalCommits} commits? I've seen more activity from a hibernating bear. My coal reserves are overflowing thanks to developers like you. Next year, code like your keyboard depends on it.`,
+    'extremely-naughty': `@${input.username}... *cracks knuckles* I found cobwebs in your GitHub profile. Did you forget how to commit? ${input.summary.totalCommits} contributions won't even fill my smallest punishment sack. Next year, I'll be watching. Make it count, or I'm upgrading from coal to corrupted databases.`,
   };
   return templates[input.verdictTier];
 }
