@@ -83,7 +83,7 @@ export default function ResultsPage({
         <div className="text-center pt-4">
           <Link
             href="/"
-            className="inline-block px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg font-semibold transition-colors"
+            className="inline-block px-6 py-3 bg-[#1d351d] hover:bg-[#325632] text-white rounded-lg font-semibold transition-colors"
           >
             Check Another Username
           </Link>

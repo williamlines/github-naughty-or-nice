@@ -61,7 +61,7 @@ describe('ScoreBreakdown', () => {
   it('has the correct container styling', () => {
     const { container } = render(<ScoreBreakdown categories={mockCategories} />);
     const card = container.firstChild;
-    expect(card).toHaveClass('bg-white/5');
+    expect(card).toHaveClass('bg-white');
     expect(card).toHaveClass('rounded-2xl');
   });
 });

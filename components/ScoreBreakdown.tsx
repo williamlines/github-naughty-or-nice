@@ -16,9 +16,9 @@ export function ScoreBreakdown({
   categories: CategoryScores;
 }) {
   return (
-    <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-      <h2 className="text-xl font-bold mb-4">Score Breakdown</h2>
-      <div className="divide-y divide-white/10">
+    <div className="bg-white rounded-2xl p-6 border-2 border-[#e6be9a] shadow-xl">
+      <h2 className="text-xl font-bold mb-4 text-slate-800">Score Breakdown</h2>
+      <div className="divide-y divide-[#e6be9a]">
         {categoryOrder.map((id) => (
           <CategoryRow key={id} id={id} data={categories[id]} />
         ))}

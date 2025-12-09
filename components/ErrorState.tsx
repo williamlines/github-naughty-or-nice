@@ -36,11 +36,11 @@ export function ErrorState({ code }: { code: ErrorCode }) {
   return (
     <div className="text-center">
       <div className="text-6xl mb-4">😅</div>
-      <h2 className="text-2xl font-bold mb-2">{title}</h2>
-      <p className="text-gray-400 mb-6">{message}</p>
+      <h2 className="text-2xl font-bold mb-2 text-slate-800">{title}</h2>
+      <p className="text-slate-600 mb-6">{message}</p>
       <Link
         href="/"
-        className="inline-block px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition-colors"
+        className="inline-block px-6 py-3 bg-[#1d351d] hover:bg-[#325632] text-white rounded-lg font-semibold transition-colors shadow-lg"
       >
         Try Another Username
       </Link>

@@ -25,9 +25,9 @@ interface CategoryRowProps {
 
 export function CategoryRow({ id, data }: CategoryRowProps) {
   const getBarColor = (score: number) => {
-    if (score >= 70) return 'bg-green-500';
-    if (score >= 40) return 'bg-yellow-500';
-    return 'bg-red-500';
+    if (score >= 70) return 'bg-[#325632]';
+    if (score >= 40) return 'bg-[#e6be9a]';
+    return 'bg-[#8b181d]';
   };
 
   return (
@@ -35,13 +35,13 @@ export function CategoryRow({ id, data }: CategoryRowProps) {
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-2">
           <span>{categoryIcons[id]}</span>
-          <span className="font-medium">{categoryLabels[id]}</span>
+          <span className="font-medium text-slate-700">{categoryLabels[id]}</span>
         </div>
-        <span className="font-bold">{data.score}</span>
+        <span className="font-bold text-slate-900">{data.score}</span>
       </div>
 
       {/* Progress bar */}
-      <div className="h-2 bg-white/10 rounded-full overflow-hidden mb-1">
+      <div className="h-2 bg-stone-100 rounded-full overflow-hidden mb-1">
         <div
           className={`h-full ${getBarColor(data.score)} transition-all duration-500`}
           style={{ width: `${data.score}%` }}
@@ -49,7 +49,7 @@ export function CategoryRow({ id, data }: CategoryRowProps) {
       </div>
 
       {/* Quip */}
-      <p className="text-sm text-gray-400 italic">{data.quip}</p>
+      <p className="text-sm text-slate-700 italic">{data.quip}</p>
     </div>
   );
 }

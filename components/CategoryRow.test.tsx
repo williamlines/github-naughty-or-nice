@@ -58,25 +58,25 @@ describe('CategoryRow', () => {
 
   it('uses green color for high scores (>=70)', () => {
     render(<CategoryRow id="commitConsistency" data={{ ...mockScore, score: 85 }} />);
-    const bar = document.querySelector('.bg-green-500');
+    const bar = document.querySelector('.bg-\\[\\#325632\\]');
     expect(bar).toBeInTheDocument();
   });
 
-  it('uses yellow color for medium scores (40-69)', () => {
+  it('uses beige color for medium scores (40-69)', () => {
     render(<CategoryRow id="commitConsistency" data={{ ...mockScore, score: 50 }} />);
-    const bar = document.querySelector('.bg-yellow-500');
+    const bar = document.querySelector('.bg-\\[\\#e6be9a\\]');
     expect(bar).toBeInTheDocument();
   });
 
   it('uses red color for low scores (<40)', () => {
     render(<CategoryRow id="commitConsistency" data={{ ...mockScore, score: 25 }} />);
-    const bar = document.querySelector('.bg-red-500');
+    const bar = document.querySelector('.bg-\\[\\#8b181d\\]');
     expect(bar).toBeInTheDocument();
   });
 
   it('sets correct width on progress bar', () => {
     render(<CategoryRow id="commitConsistency" data={{ ...mockScore, score: 60 }} />);
-    const bar = document.querySelector('.bg-yellow-500');
+    const bar = document.querySelector('.bg-\\[\\#e6be9a\\]');
     expect(bar).toHaveStyle({ width: '60%' });
   });
 });

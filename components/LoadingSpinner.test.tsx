@@ -57,7 +57,7 @@ describe('LoadingSpinner', () => {
     const { container } = render(<LoadingSpinner />);
     const spinner = container.querySelector('.animate-spin');
     expect(spinner).toBeInTheDocument();
-    expect(spinner).toHaveClass('border-green-500');
+    expect(spinner).toHaveClass('border-[#8b181d]');
     expect(spinner).toHaveClass('rounded-full');
   });
 });

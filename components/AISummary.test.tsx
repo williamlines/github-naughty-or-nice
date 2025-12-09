@@ -30,9 +30,9 @@ describe('AISummary', () => {
   it('has the correct container styling', () => {
     const { container } = render(<AISummary summary="Test" />);
     const card = container.firstChild;
-    expect(card).toHaveClass('bg-white/5');
+    expect(card).toHaveClass('bg-white');
     expect(card).toHaveClass('rounded-2xl');
-    expect(card).toHaveClass('border');
+    expect(card).toHaveClass('border-2');
   });
 
   it('handles long summaries', () => {
