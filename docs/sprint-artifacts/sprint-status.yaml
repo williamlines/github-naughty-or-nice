@@ -47,7 +47,7 @@ quick-wins-stories:
   story-2-fix-ai-message-duplication: complete # Bug fix - All tests passing, manual testing confirmed
   story-3-kinder-scoring-thresholds: complete # Enhancement - All thresholds updated, tests passing
   story-4-winter-wonderland-color-scheme: complete # Enhancement - Classic Christmas palette implemented, all tests passing
-  story-5-snowfall-animation-toggle: drafted # Enhancement - ~45 min
+  story-5-snowfall-animation-toggle: complete # Enhancement - Snowfall with toggle, localStorage, all 189 tests passing
 
 # ===========================================
 # SKIPPED FOR MVP (can add post-launch)

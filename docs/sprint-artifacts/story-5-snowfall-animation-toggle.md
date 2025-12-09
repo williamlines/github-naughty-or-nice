@@ -1,6 +1,6 @@
 # Story 5: Snowfall Animation with Toggle
 
-Status: drafted
+Status: complete
 
 ## Story
 
@@ -316,16 +316,104 @@ describe('SnowfallEffect', () => {
 
 ### Agent Model Used
 
-<!-- Will be populated by dev agent -->
+Claude Sonnet 4.5 (claude-sonnet-4-5-20250929)
 
 ### Debug Log References
 
-<!-- Will be populated by dev agent -->
+N/A - Straightforward implementation following story specifications.
 
 ### Completion Notes List
 
-<!-- Will be populated by dev agent -->
+**Snowfall Effect Component Created:**
+
+Created new SnowfallEffect component with toggle control and localStorage persistence for optimal user experience.
+
+**Component Implementation:**
+- File: `components/SnowfallEffect.tsx`
+- 50 snowflakes with randomized positions, durations (10-20s), and delays (0-10s)
+- Toggle control in top-right with Christmas-themed styling
+- Beige border and white background to match color palette
+- Dark green checkbox accent color (#1d351d)
+- Default state: ON (snowfall enabled)
+
+**CSS Animations:**
+- Added to `app/globals.css` at bottom
+- GPU-accelerated with `transform` (translateY/translateX)
+- Smooth 60fps performance
+- Fixed positioning with `pointer-events: none` to prevent UI blocking
+- Snowflakes fade out as they fall (opacity 1 → 0.3)
+- Horizontal drift (50px) for natural movement
+
+**localStorage Persistence:**
+- Key: `snowfall-enabled`
+- Values: `'true'` | `'false'` (string)
+- Default: `true` (enabled on first visit)
+- Loads preference on mount via useEffect
+- Saves preference on toggle
+
+**Landing Page Integration:**
+- Imported SnowfallEffect in `app/page.tsx`
+- Rendered before main content in Fragment wrapper
+- Z-index: 1 (below UI elements, above background)
+
+**Unit Tests:**
+- Created `components/SnowfallEffect.test.tsx`
+- 16 comprehensive test cases covering:
+  - Toggle control rendering and functionality
+  - Default enabled state
+  - Enable/disable toggling
+  - localStorage persistence (both states)
+  - Loading saved preferences
+  - Random positions, durations, and delays
+  - Pointer-events: none verification
+  - Styling and accessibility
+
+**Test Results:**
+- All 189 tests passing (173 existing + 16 new)
+- Added new test file to suite
+- No existing tests broken
+
+**Styling Details:**
+- Toggle button: White background with beige border (#e6be9a)
+- Checkbox: Dark green accent (#1d351d)
+- Label: Dark slate text (slate-800) with snowflake emoji
+- Toggle positioned: fixed top-4 right-4
+- Shadow and backdrop blur for polish
+
+**Performance:**
+- Using CSS animations only (no JavaScript animation loops)
+- GPU-accelerated transforms for 60fps
+- 50 snowflakes optimal for visual effect vs performance
+- Pointer-events: none prevents interaction blocking
+- Z-index: 1 keeps snowfall behind interactive elements
+
+**Accessibility:**
+- Native checkbox input (keyboard accessible)
+- Clear label with emoji
+- Snowflakes decorative only (don't interfere with screen readers)
+- Toggle easily discoverable in top-right
+
+**Design Decisions:**
+- Integrated Christmas color palette (beige border, dark green checkbox)
+- White/light background for toggle to stand out
+- Used existing design patterns from other components
+- Positioned non-intrusively in top-right corner
+
+**Edge Cases Handled:**
+- localStorage unavailable: Defaults to enabled
+- SSR: useEffect ensures localStorage only accessed client-side
+- Hydration: Default state prevents hydration mismatches
 
 ### File List
 
-<!-- Will be populated by dev agent -->
+**Created:**
+- `components/SnowfallEffect.tsx` - Main component with toggle and snowfall
+- `components/SnowfallEffect.test.tsx` - 16 comprehensive unit tests
+
+**Modified:**
+- `app/globals.css` - Added snowfall CSS animations and keyframes
+- `app/page.tsx` - Imported and rendered SnowfallEffect
+- `docs/sprint-artifacts/sprint-status.yaml` - Updated story status
+- `docs/sprint-artifacts/story-5-snowfall-animation-toggle.md` - Status and completion notes
+
+**Test Results:** 189/189 tests passing (16 new tests, 100% pass rate)

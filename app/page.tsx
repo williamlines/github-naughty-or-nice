@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { SnowfallEffect } from '@/components/SnowfallEffect';
 
 export default function Home() {
   const [username, setUsername] = useState('');
@@ -27,7 +28,9 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6">
+    <>
+      <SnowfallEffect />
+      <main className="flex min-h-screen flex-col items-center justify-center p-6">
       <div className="text-center max-w-2xl mx-auto">
         {/* Header */}
         <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-[#8b181d] via-[#325632] to-[#8b181d] bg-clip-text text-transparent">
@@ -77,5 +80,6 @@ export default function Home() {
         </p>
       </div>
     </main>
+    </>
   );
 }
